@@ -1,33 +1,47 @@
 # SHIELD – Smart Holistic Intelligence for Enterprise Lending Decisions
 
-> **Intelli-Credit Hackathon 2026** – AI-powered credit appraisal platform
+> **Intelli-Credit Hackathon 2026** – AI-powered credit decisioning platform  
+> Full-stack: React 18 + FastAPI + Groq Llama 3.3-70B + XGBoost + NetworkX
+
+---
+
+## ✨ Features
+
+| Module | Technology | What It Does |
+|--------|-----------|--------------|
+| M01 – Document Ingestion | pdfplumber, regex | Parses financial PDFs/TXTs |
+| M02 – Financial Analysis | Rule-based | DSCR, D/E ratio, Current Ratio, Margin |
+| M03 – NLP Parser | Pattern matching | Extracts key financial terms |
+| M04 – Circular Trading | NetworkX graph | Detects GST loop fraud cycles |
+| M05 – Intelligence Agent | Rule-based | DRT notices, promoter risk |
+| M06 – Risk Scoring | XGBoost (trained on 500 companies) | SHIELD Score 0–100 |
+| M07 – CAM Report | python-docx, fpdf2 | Auto-generates DOCX / PDF / JSON |
+| M08 – Early Warning | Statistical | Cashflow trend monitoring |
+| M09 – AI Chatbot | **Groq Llama 3.3-70B** | Full case-aware Q&A |
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Install Backend Dependencies
+### 1. Set your Groq API Key
+
+```bash
+# Create backend/.env
+echo GROQ_API_KEY=your_groq_key_here > backend/.env
+```
+Get a free key at [console.groq.com](https://console.groq.com)
+
+### 2. Install & Start Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 8000
 ```
 
-> **Note:** If `xgboost` gives issues on Windows, use: `pip install xgboost --no-cache-dir`
+> On startup: IsolationForest (fraud) + XGBoost (risk) models auto-train on the 500-company dataset.
 
-### 2. Start the FastAPI Backend
-
-```bash
-cd backend
-uvicorn main:app --reload --port 8000
-```
-
-The API will be available at **http://localhost:8000**  
-Swagger docs at **http://localhost:8000/docs**
-
-> On startup, the system automatically trains the Fraud Detection and Risk Scoring models on the `company_financial_dataset.csv`.
-
-### 3. Install & Start the Frontend
+### 3. Install & Start Frontend
 
 ```bash
 cd frontend
@@ -35,7 +49,7 @@ npm install
 npm run dev
 ```
 
-The React dashboard will be available at **http://localhost:5173**
+Visit **http://localhost:5173**
 
 ---
 
@@ -44,33 +58,30 @@ The React dashboard will be available at **http://localhost:5173**
 ```
 Shield_credit_intelligence/
 ├── backend/
-│   ├── main.py                    # FastAPI app (9 endpoints)
-│   ├── requirements.txt           # Python dependencies
-│   ├── reports/                   # Generated CAM reports
+│   ├── main.py                        # FastAPI (11 endpoints)
+│   ├── .env                           # GROQ_API_KEY (not committed)
+│   ├── requirements.txt
 │   └── models/
-│       ├── financial_analyzer.py  # DSCR, D/E, Current Ratio, Margin
-│       ├── fraud_detection_model.py  # IsolationForest anomaly detection
+│       ├── financial_analyzer.py      # Ratio calculations
+│       ├── fraud_detection_model.py   # IsolationForest
 │       ├── circular_trading_detector.py  # NetworkX graph cycles
-│       ├── risk_scoring_model.py  # XGBoost SHIELD Score 0-100
-│       ├── loan_decision_engine.py  # APPROVE/CONDITIONAL/REJECT
-│       ├── cam_report_generator.py  # DOCX + PDF + JSON export
-│       └── document_parser.py     # pdfplumber + regex extraction
+│       ├── risk_scoring_model.py      # XGBoost SHIELD Score
+│       ├── loan_decision_engine.py    # APPROVE/CONDITIONAL/REJECT
+│       ├── cam_report_generator.py    # DOCX + PDF + JSON
+│       └── document_parser.py        # PDF text extraction
 ├── frontend/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Landing.jsx        # Homepage with hero + case card
-│   │   │   ├── NewCase.jsx        # Document upload + financial form
-│   │   │   └── Dashboard.jsx      # Main dashboard (9 module views)
-│   │   ├── components/
-│   │   │   ├── Sidebar.jsx        # Pipeline navigation
-│   │   │   └── ShieldLogo.jsx     # SVG logo
-│   │   ├── context/
-│   │   │   └── AppState.jsx       # Global state provider
-│   │   └── services/
-│   │       └── api.js             # Axios API wrapper
-│   └── package.json
+│   └── src/
+│       ├── pages/
+│       │   ├── Landing.jsx            # Hero + live case preview
+│       │   ├── NewCase.jsx            # Document upload + form
+│       │   └── Dashboard.jsx          # 9-module dashboard
+│       ├── components/
+│       │   ├── Sidebar.jsx
+│       │   └── ShieldLogo.jsx
+│       ├── context/AppState.jsx       # Global state
+│       └── services/api.js            # Axios wrapper
 └── shield_models/
-    └── company_financial_dataset.csv  # 500-company training dataset
+    └── company_financial_dataset.csv  # 500-company training set
 ```
 
 ---
@@ -79,62 +90,57 @@ Shield_credit_intelligence/
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | Health check |
-| POST | `/upload-document` | Parse PDF/TXT files |
-| POST | `/financial-analysis` | Calculate ratios (DSCR, D/E, etc.) |
-| POST | `/fraud-detection` | IsolationForest anomaly detection |
-| POST | `/circular-trading` | NetworkX graph cycle detection |
-| POST | `/risk-score` | XGBoost SHIELD Score (0–100) |
-| POST | `/loan-decision` | APPROVE / CONDITIONAL / REJECT |
-| POST | `/run-pipeline` | Full analysis pipeline in one call |
-| POST | `/generate-cam` | Generate CAM report (DOCX/PDF/JSON) |
-| GET | `/download-cam/{case_id}/{format}` | Download generated report |
+| GET | `/health` | Model status check |
+| POST | `/upload-document` | Parse PDF/TXT |
+| POST | `/financial-analysis` | Calculate ratios |
+| POST | `/fraud-detection` | Anomaly detection |
+| POST | `/circular-trading` | Graph cycle detection |
+| POST | `/risk-score` | XGBoost SHIELD Score |
+| POST | `/loan-decision` | Final credit decision |
+| POST | `/run-pipeline` | Full pipeline in one call |
+| POST | `/generate-cam` | Generate CAM report |
+| POST | `/generate-download-cam/{format}` | Generate + download (docx/pdf/json) |
+| POST | `/chat` | Groq Llama 3.3-70B chatbot |
 
 ---
 
-## 🎯 Pipeline Flow
+## 🤖 AI Chatbot
 
-```
-Upload Documents → Document Parsing → Financial Analysis
-→ Fraud Detection → Circular Trading → Risk Scoring
-→ Loan Decision → CAM Report Generation
-```
+The chatbot (M09) is powered by **Groq's Llama 3.3-70B** and has full context of the case:
+- All financial ratios, fraud flags, circular trading evidence
+- Risk scores, loan decision, pre-disbursement conditions
+- Supports multi-turn conversation with evidence-grounded answers
+
+Without a Groq API key, it falls back to a smart rule-based engine.
 
 ---
 
-## 📊 Example Response
+## 📊 Dataset Format
 
-```json
-{
-  "company": "Arvind Steel & Alloys Pvt. Ltd.",
-  "shield_score": 42,
-  "risk_level": "HIGH",
-  "financial_ratios": {
-    "dscr": 1.18,
-    "debt_to_equity": 0.65,
-    "current_ratio": 7.8,
-    "profit_margin": 0.23
-  },
-  "fraud_analysis": {
-    "anomaly_detected": false,
-    "flags": ["Abnormal GSTR-2A/3B gap: 24.7%"]
-  },
-  "circular_trading": {
-    "fraud_detected": true,
-    "cycle_count": 2
-  },
-  "loan_decision": {
-    "decision": "CONDITIONAL APPROVAL",
-    "reasons": ["DSCR Below Threshold (1.18x)", "Circular Trading Detected"]
-  }
-}
+To train models on your own data, provide a CSV with:
+
+```
+company, revenue, ebitda, total_debt, equity,
+current_assets, current_liabilities, ebit,
+interest_expense, debt_payment,
+circular_trading (0/1), news_risk (0-5), loan_default (0/1)
 ```
 
 ---
 
 ## 🔧 Troubleshooting
 
-- **Backend port conflict**: Change port with `--port 8001` and update `frontend/src/services/api.js`
-- **XGBoost error**: Install separately: `pip install xgboost==2.0.3`
-- **CORS issues**: Frontend proxies `/api` to backend; ensure backend is on port 8000
-- **pdfplumber error**: `pip install pdfplumber Pillow`
+| Issue | Fix |
+|-------|-----|
+| Backend not starting | `python -m uvicorn main:app --reload --port 8000` |
+| XGBoost error | `pip install xgboost==2.0.3` |
+| Chatbot always offline | Check `backend/.env` has valid `GROQ_API_KEY` |
+| CAM download fails | Ensure backend is running on port 8000 |
+
+---
+
+## 🏆 Hackathon Context
+
+**Intelli-Credit Challenge 2026** — Category: AI-Powered Credit Intelligence  
+Case Study: Arvind Steel & Alloys Pvt. Ltd. – ₹18 Cr loan application  
+Outcome: CONDITIONAL APPROVAL – ₹10 Cr (SHIELD Score: 42/100, HIGH RISK)
