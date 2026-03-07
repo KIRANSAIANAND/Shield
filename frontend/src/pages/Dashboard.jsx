@@ -41,11 +41,11 @@ export default function Dashboard() {
                               </svg>
                          </button>
                          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div>
-                                   <div style={{ fontWeight: 700, fontSize: '15px', color: '#e8edf5' }}>
+                              <div className="topbar-left-content" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                   <div className="text-truncate" style={{ fontWeight: 700, fontSize: '15px', color: '#e8edf5' }}>
                                         {MODULE_TITLES[activeModule] || 'Dashboard Overview'}
                                    </div>
-                                   <div style={{ fontSize: '10px', color: '#7b90b0', marginTop: '1px' }}>
+                                   <div className="text-truncate" style={{ fontSize: '10px', color: '#7b90b0', marginTop: '1px' }}>
                                         {result.company} · {result.case_id}
                                    </div>
                               </div>
@@ -55,7 +55,7 @@ export default function Dashboard() {
 
                                    {user && (
 
-                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                                        <div className="user-pill text-truncate" style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
 
                                              👤 {user.name || user.email}
 
@@ -145,17 +145,17 @@ function OverviewModule({ result, riskColor, caseData, setActiveModule }) {
                          <div style={{ width: '32px', height: '2px', background: '#00d4ff' }} />
                          <span style={{ fontSize: '10px', color: '#00d4ff', fontWeight: 700, letterSpacing: '0.12em' }}>CASE OVERVIEW</span>
                     </div>
-                    <h2 style={{ fontWeight: 800, fontSize: '32px', color: '#e8edf5', marginBottom: '6px', fontFamily: 'Space Grotesk' }}>
+                    <h2 className="responsive-title" style={{ fontWeight: 800, color: '#e8edf5', marginBottom: '6px', fontFamily: 'Space Grotesk' }}>
                          SHIELD – Credit Appraisal
                     </h2>
-                    <p style={{ color: '#7b90b0', fontSize: '14px' }}>
+                    <p style={{ color: '#7b90b0', fontSize: '13px', lineHeight: 1.5 }}>
                          {result.company} · ₹{result.loan_amount_requested} Cr loan application ·{' '}
-                         <span style={{ color: '#ffaa00' }}>Conditional approval recommended</span>
+                         <span style={{ color: '#ffaa00', display: 'inline-block' }}>Conditional approval recommended</span>
                     </p>
                </div>
 
                {/* Metric Cards Row */}
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
+               <div className="metric-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
                     <MetricCard label="Loan Requested" subLabel="WC + Term Loan" value={`₹${result.loan_amount_requested} Cr`} color="#e8edf5" />
                     <MetricCard label="Approved Amount" subLabel={`MCLR+2.50% · 24m`} value={`₹${result.loan_amount_approved} Cr`} color="#00d4ff" />
                     <MetricCard label="SHIELD Score" subLabel="High Risk" value={`${risk.shield_score}/100`} color={riskColor} />
@@ -163,7 +163,7 @@ function OverviewModule({ result, riskColor, caseData, setActiveModule }) {
                </div>
 
                {/* Content Grid */}
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+               <div className="content-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     {/* Left - Score Breakdown */}
                     <div className="glass-card" style={{ padding: '24px' }}>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>

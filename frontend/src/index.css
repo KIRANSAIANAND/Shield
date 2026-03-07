@@ -371,6 +371,17 @@ body {
    RESPONSIVE DESIGN – Mobile First Breakpoints
    ═══════════════════════════════════════════════════════ */
 
+/* Text Truncation Utility */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.responsive-title {
+  font-size: 32px;
+}
+
 /* Hamburger button visible only on mobile */
 .hamburger-btn {
   display: none;
@@ -430,6 +441,11 @@ body {
     padding: 10px 16px !important;
   }
 
+  .topbar-left-content {
+    max-width: 50%;
+    /* Prevent pushing buttons off-screen */
+  }
+
   .topbar-case-label {
     display: none;
   }
@@ -437,6 +453,10 @@ body {
   /* Two-col grids → one column */
   [style*="gridTemplateColumns: '1fr 1fr'"],
   [style*='gridTemplateColumns: "1fr 1fr"'] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .content-grid {
     grid-template-columns: 1fr !important;
   }
 
@@ -454,6 +474,11 @@ body {
   .cam-grid {
     grid-template-columns: 1fr !important;
   }
+
+  .responsive-title {
+    font-size: 24px;
+    /* smaller title */
+  }
 }
 
 /* ── Mobile (≤480px) ─────────────────────────────────────── */
@@ -464,6 +489,24 @@ body {
 
   .topbar {
     padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .topbar-left-content {
+    max-width: 40%;
+  }
+
+  .new-case-btn span {
+    display: none;
+    /* Hide 'New Case' text, keep plus icon */
+  }
+
+  .new-case-btn {
+    padding: 6px 10px !important;
+  }
+
+  .user-pill {
+    max-width: 60px;
   }
 
   /* Metric cards → 1 column on small phones */
