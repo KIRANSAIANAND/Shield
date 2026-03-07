@@ -121,6 +121,9 @@ const MODULE_TITLES = {
      chatbot: 'Mo9 – AI Credit Intelligence Chatbot',
 }
 
+// ─── Environment ─────────────────────────────────────────────────────────────
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 // ─── Overview (Dashboard) ────────────────────────────────────────────────────
 function OverviewModule({ result, riskColor, caseData, setActiveModule }) {
      const r = result.financial_ratios
@@ -510,7 +513,7 @@ function CAMModule({ result }) {
           setGenerating(true)
           setErrorMsg(null)
           try {
-               const res = await fetch('http://localhost:8000/generate-cam', {
+               const res = await fetch(`${API_URL}/generate-cam`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(CAM_PAYLOAD),
@@ -534,7 +537,7 @@ function CAMModule({ result }) {
           setErrorMsg(null)
           try {
                // Use the combined generate+download endpoint
-               const res = await fetch(`http://localhost:8000/generate-download-cam/${fmt}`, {
+               const res = await fetch(`${API_URL}/generate-download-cam/${fmt}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(CAM_PAYLOAD),
@@ -724,7 +727,7 @@ function ChatbotModule({ result }) {
                .map(m => ({ role: m.role, content: m.content }))
 
           try {
-               const res = await fetch('http://localhost:8000/chat', {
+               const res = await fetch(`${API_URL}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
