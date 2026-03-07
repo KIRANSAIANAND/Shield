@@ -9,6 +9,7 @@ import {
      RadialBarChart, RadialBar, Legend
 } from 'recharts'
 import shieldApi from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 export default function Dashboard() {
@@ -16,6 +17,9 @@ export default function Dashboard() {
      const [activeModule, setActiveModule] = useState(module || 'overview')
      const { caseData, pipelineResult } = useAppState()
      const navigate = useNavigate()
+     const { user, logout } = useAuth()
+
+     const handleLogout = () => { logout(); navigate('/login') }
 
      const result = pipelineResult || DEMO_RESULT
      const risk = result.risk_assessment
@@ -38,13 +42,26 @@ export default function Dashboard() {
                                    {result.company} · {result.case_id}
                               </div>
                          </div>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <span className="badge-high">HIGH RISK</span>
-                              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px' }}
-                                   onClick={() => navigate('/new-case')}>
-                                   <PlusCircle size={13} /> New Case
-                              </button>
-                         </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                               <span className="badge-high">HIGH RISK</span>
+                               {user && (
+                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+                                         👤 {user.name || user.email}
+                                    </div>
+                               )}
+                               <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px' }}
+                                    onClick={() => navigate('/new-case')}>
+                                    <PlusCircle size={13} /> New Case
+                               </button>
+                               <button onClick={handleLogout} style={{
+                                    background: 'transparent', border: '1px solid #ff336640',
+                                    borderRadius: '8px', padding: '7px 13px',
+                                    color: '#ff6688', fontSize: '12px', fontWeight: 600,
+                                    cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                               }}>
+                                    Sign Out
+                               </button>
+                          </div>
                     </div>
 
                     {/* Module Views */}
@@ -487,11 +504,6 @@ function CAMModule({ result }) {
      const handleDownload = async (fmt) => {
           setDownloadingFmt(fmt)
           setErrorMsg(null)
-          const mimeTypes = {
-               docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-               pdf: 'application/pdf',
-               json: 'application/json',
-          }
           try {
                // Use the combined generate+download endpoint
                const res = await fetch(`http://localhost:8000/generate-download-cam/${fmt}`, {
@@ -500,16 +512,28 @@ function CAMModule({ result }) {
                     body: JSON.stringify(CAM_PAYLOAD),
                })
                if (!res.ok) throw new Error(await res.text())
+
+               // Build filename: CAM_Report_ArvindSteel_CAM-2026-0342.docx
+               const cleanCompany = (result.company || 'Company')
+                    .replace(/&/g, 'and')
+                    .replace(/[^\w\s]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '_')
+                    .replace(/_+/g, '_')
+               const clientFilename = `CAM_Report_${cleanCompany}_${result.case_id}.${fmt}`
+               // Server sends X-Download-Filename header — use it as authoritative name
+               const finalFilename = res.headers.get('X-Download-Filename') || clientFilename
+
                const blob = await res.blob()
                const url = URL.createObjectURL(blob)
                const a = document.createElement('a')
                a.href = url
-               a.download = `${result.case_id}_SHIELD_CAM.${fmt}`
+               a.download = finalFilename
                document.body.appendChild(a)
                a.click()
                document.body.removeChild(a)
-               // Delay revoke so Chrome can read filename before blob is released
-               setTimeout(() => URL.revokeObjectURL(url), 2000)
+               // Delay revoke so Chrome finalises filename before blob is released
+               setTimeout(() => URL.revokeObjectURL(url), 3000)
           } catch (err) {
                setErrorMsg(`Download failed: ${err.message}. Make sure the backend is running (uvicorn main:app --reload).`)
           } finally {

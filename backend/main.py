@@ -6,10 +6,17 @@ from pathlib import Path
 from typing import Optional, List
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel, EmailStr
+
+# Auth module
+from auth import (
+    create_user, authenticate_user, get_user_by_id,
+    create_token, decode_token
+)
 
 # Optional Groq LLM
 try:
@@ -83,6 +90,20 @@ app.add_middleware(
 # Pydantic Models
 # ---------------------------------------------------------------------------
 
+class SignupInput(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class LoginInput(BaseModel):
+    email: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: dict
+
 class FinancialData(BaseModel):
     company_name: str = "Unknown Company"
     loan_amount_cr: float = 10.0
@@ -148,9 +169,55 @@ class ChatInput(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/")
-def root():
-    return {"status": "SHIELD API Running", "version": "1.0.0"}
+# ── Auth ─────────────────────────────────────────────────────────────────
+
+security = HTTPBearer(auto_error=False)
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    payload = decode_token(credentials.credentials)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user = get_user_by_id(int(payload["sub"]))
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+
+@app.post("/auth/signup")
+def signup(data: SignupInput):
+    """Create a new account with email + password."""
+    if not data.email or "@" not in data.email:
+        raise HTTPException(status_code=400, detail="Invalid email address")
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    if not data.name.strip():
+        raise HTTPException(status_code=400, detail="Name is required")
+    try:
+        user = create_user(data.email.strip(), data.name.strip(), data.password)
+        token = create_token(user["id"], user["email"])
+        return {"access_token": token, "token_type": "bearer", "user": {"id": user["id"], "email": user["email"], "name": user["name"]}}
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+@app.post("/auth/login")
+def login(data: LoginInput):
+    """Authenticate with email + password. Returns JWT."""
+    user = authenticate_user(data.email.strip(), data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    token = create_token(user["id"], user["email"])
+    return {"access_token": token, "token_type": "bearer", "user": user}
+
+
+@app.get("/auth/me")
+def me(current_user: dict = Depends(get_current_user)):
+    """Return current user info from JWT."""
+    return current_user
+
+
 
 @app.get("/health")
 def health():
@@ -369,6 +436,12 @@ def generate_and_download_cam(data: CAMInput, format: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=500, detail="Report file not created")
 
+    # Build clean filename: CAM_Report_ArvindSteel_CAM-2026-0342.docx
+    import re
+    clean_company = re.sub(r'[^\w]', '', data.company_name.replace(' ', '_').replace('&', 'and'))
+    clean_company = re.sub(r'_+', '_', clean_company).strip('_')
+    download_name = f"CAM_Report_{clean_company}_{case_id}.{format}"
+
     media_types = {
         "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "pdf": "application/pdf",
@@ -377,8 +450,12 @@ def generate_and_download_cam(data: CAMInput, format: str):
     return FileResponse(
         file_path,
         media_type=media_types[format],
-        filename=f"{case_id}_SHIELD_CAM.{format}",
-        headers={"Content-Disposition": f'attachment; filename="{case_id}_SHIELD_CAM.{format}"'},
+        filename=download_name,
+        headers={
+            "Content-Disposition": f'attachment; filename="{download_name}"',
+            "X-Download-Filename": download_name,
+            "Access-Control-Expose-Headers": "Content-Disposition, X-Download-Filename",
+        },
     )
 
 
