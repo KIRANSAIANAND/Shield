@@ -448,7 +448,7 @@ function RiskModule({ result, riskColor }) {
      return (
           <div className="fade-in">
                <ModuleHeader num="M06" title="Risk Scoring" subtitle="XGBoost classifier with SHAP explainability – 5 weighted dimensions" />
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+               <div className="content-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                     {/* Gauge */}
                     <div className="glass-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                          <svg width="200" height="200" viewBox="0 0 200 200">
@@ -577,7 +577,7 @@ function CAMModule({ result }) {
      return (
           <div className="fade-in">
                <ModuleHeader num="M07" title="CAM Report Generator" subtitle="Auto-generated Credit Appraisal Memo – DOCX, PDF, JSON" />
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+               <div className="cam-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                     {/* Preview */}
                     <div className="glass-card" style={{ padding: '28px' }}>
                          <div style={{ fontWeight: 700, fontSize: '16px', color: '#e8edf5', marginBottom: '16px' }}>Report Preview</div>
