@@ -196,7 +196,7 @@ export default function Login() {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '11px', color: 'var(--text-muted)' }}>
-                         Intelli-Credit Hackathon 2026 · Powered by Groq Llama 3.3-70B
+                         Powered by Groq Llama 3.3-70B
                     </div>
                </div>
           </div>

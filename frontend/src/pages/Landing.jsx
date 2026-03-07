@@ -116,7 +116,7 @@ export default function Landing() {
                          }}>
                               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4ff', display: 'inline-block' }} />
                               <span style={{ fontSize: '10px', color: '#00d4ff', fontWeight: 700, letterSpacing: '0.12em' }}>
-                                   INTELLI-CREDIT HACKATHON 2026 – LIVE SUBMISSION
+                                   LIVE CREDIT APPRAISAL
                               </span>
                          </div>
 
@@ -182,7 +182,7 @@ export default function Landing() {
 
                {/* Footer */}
                <div style={{ textAlign: 'center', padding: '32px', borderTop: '1px solid #1e2d45', color: '#3d5272', fontSize: '12px' }}>
-                    SHIELD © 2026 – Intelli-Credit Hackathon Submission
+                    SHIELD © 2026 – All Rights Reserved
                </div>
           </div>
      )
