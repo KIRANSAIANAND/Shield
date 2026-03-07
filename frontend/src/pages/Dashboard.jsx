@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext'
 export default function Dashboard() {
      const { module } = useParams()
      const [activeModule, setActiveModule] = useState(module || 'overview')
+     const [sidebarOpen, setSidebarOpen] = useState(false)
      const { caseData, pipelineResult } = useAppState()
      const navigate = useNavigate()
      const { user, logout } = useAuth()
@@ -28,44 +29,71 @@ export default function Dashboard() {
 
      return (
           <div style={{ display: 'flex', minHeight: '100vh', background: '#080c14' }}>
-               <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
+               <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
                {/* Main Content */}
-               <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+               <div className="main-content" style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     {/* Topbar */}
-                    <div className="topbar" style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                         <div>
-                              <div style={{ fontWeight: 700, fontSize: '15px', color: '#e8edf5' }}>
-                                   {MODULE_TITLES[activeModule] || 'Dashboard Overview'}
+                    <div className="topbar" style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                         <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                   <path d="M3 12h18M3 6h18M3 18h18" />
+                              </svg>
+                         </button>
+                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div>
+                                   <div style={{ fontWeight: 700, fontSize: '15px', color: '#e8edf5' }}>
+                                        {MODULE_TITLES[activeModule] || 'Dashboard Overview'}
+                                   </div>
+                                   <div style={{ fontSize: '10px', color: '#7b90b0', marginTop: '1px' }}>
+                                        {result.company} · {result.case_id}
+                                   </div>
                               </div>
-                              <div style={{ fontSize: '10px', color: '#7b90b0', marginTop: '1px' }}>
-                                   {result.company} · {result.case_id}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+                                   <span className="badge-high">HIGH RISK</span>
+
+                                   {user && (
+
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
+
+                                             👤 {user.name || user.email}
+
+                                        </div>
+
+                                   )}
+
+                                   <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px' }}
+
+                                        onClick={() => navigate('/new-case')}>
+
+                                        <PlusCircle size={13} /> New Case
+
+                                   </button>
+
+                                   <button onClick={handleLogout} style={{
+
+                                        background: 'transparent', border: '1px solid #ff336640',
+
+                                        borderRadius: '8px', padding: '7px 13px',
+
+                                        color: '#ff6688', fontSize: '12px', fontWeight: 600,
+
+                                        cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+
+                                   }}>
+
+                                        Sign Out
+
+                                   </button>
+
                               </div>
+
                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                               <span className="badge-high">HIGH RISK</span>
-                               {user && (
-                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px' }}>
-                                         👤 {user.name || user.email}
-                                    </div>
-                               )}
-                               <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '13px' }}
-                                    onClick={() => navigate('/new-case')}>
-                                    <PlusCircle size={13} /> New Case
-                               </button>
-                               <button onClick={handleLogout} style={{
-                                    background: 'transparent', border: '1px solid #ff336640',
-                                    borderRadius: '8px', padding: '7px 13px',
-                                    color: '#ff6688', fontSize: '12px', fontWeight: 600,
-                                    cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-                               }}>
-                                    Sign Out
-                               </button>
-                          </div>
                     </div>
 
                     {/* Module Views */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '28px' }}>
+                    <div className="module-padding" style={{ flex: 1, overflow: 'auto', padding: '28px' }}>
                          {activeModule === 'overview' && <OverviewModule result={result} riskColor={riskColor} caseData={caseData} setActiveModule={setActiveModule} />}
                          {activeModule === 'financial' && <FinancialModule result={result} />}
                          {activeModule === 'nlp' && <NLPModule />}
