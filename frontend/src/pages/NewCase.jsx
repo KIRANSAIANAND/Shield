@@ -192,7 +192,7 @@ export default function NewCase() {
                               </div>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                                    {REQUIRED_DOCS.map(doc => {
-                                        const done = uploadedDocs.some(d => d.name.toLowerCase().includes(doc.toLowerCase().split(' ')[0]))
+                                        const done = uploadedDocs.some(d => d.name.toLowerCase().includes(doc.toLowerCase()));
                                         return (
                                              <div key={doc} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: done ? '#00ff87' : '#7b90b0' }}>
                                                   {done ? <CheckCircle size={12} color="#00ff87" /> : <Circle size={12} color="#3d5272" />}
